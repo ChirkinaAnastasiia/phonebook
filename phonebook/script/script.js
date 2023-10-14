@@ -153,6 +153,25 @@ const data = [
     };
   };
 
+  const createFooter = () => {
+    const footer = document.createElement('footer');
+    footer.classList.add('footer');
+
+    const footerContainer = createContainer();
+    footer.append(footerContainer);
+
+    footer.footerContainer = footerContainer;
+
+    return footer;
+  };
+
+  const createFooterText = (title) => {
+    const p = document.createElement('p');
+    p.textContent = `Все права защищены © ${title}`;
+
+    return p;
+  };
+
   const renderPhoneBook = (app, title) => {
     const header = createHeader();
     const logo = createLogo(title);
@@ -171,11 +190,14 @@ const data = [
     ]);
     const table = createTable();
     const form = createForm();
+    const footer = createFooter();
+    const footerText = createFooterText(title);
 
     header.headerContainer.append(logo);
     main.mainContainer.append(buttonGroup.btnWrapper, table, form.overlay);
+    footer.footerContainer.append(footerText);
 
-    app.append(header, main);
+    app.append(header, main, footer);
 
     return {
       list: table.tbody,
