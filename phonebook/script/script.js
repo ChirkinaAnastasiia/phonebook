@@ -93,6 +93,7 @@ const data = [
         <th>Имя</th>
         <th>Фамилия</th>
         <th>Телефон</th>
+        <th></th>
       </tr>
     `);
 
@@ -147,9 +148,12 @@ const data = [
 
     overlay.append(form);
 
+    const formCloseButton = form.querySelector('.close');
+
     return {
       overlay,
       form,
+      formCloseButton,
     };
   };
 
@@ -167,6 +171,7 @@ const data = [
 
   const createFooterText = (title) => {
     const p = document.createElement('p');
+    p.classList.add('footer-text');
     p.textContent = `Все права защищены © ${title}`;
 
     return p;
@@ -201,6 +206,11 @@ const data = [
 
     return {
       list: table.tbody,
+      logo,
+      btnAdd: buttonGroup.btns[0],
+      formOverlay: form.overlay,
+      form: form.form,
+      formCloseButton: form.formCloseButton,
     };
   };
 
@@ -223,9 +233,18 @@ const data = [
     const phoneLink = document.createElement('a');
     phoneLink.href = `tel:${phone}`;
     phoneLink.textContent = phone;
+    tr.phoneLink = phoneLink;
     tdPhone.append(phoneLink);
 
-    tr.append(tdDel, tdName, tdSurname, tdPhone);
+    const tdEdit = document.createElement('td');
+    const buttonEdit = document.createElement('button');
+    buttonEdit.classList.add('edit-icon');
+    buttonEdit.insertAdjacentHTML('beforeend', `
+    <image class="edit-icon-img" src="./phonebook/img/edit.svg"></image>
+    `);
+    tdEdit.append(buttonEdit);
+
+    tr.append(tdDel, tdName, tdSurname, tdPhone, tdEdit);
 
     return tr;
   };
@@ -233,18 +252,96 @@ const data = [
   const renderContacts = (elem, data) => {
     const allRow = data.map(createRow);
     elem.append(...allRow);
+
+    return allRow;
+  };
+
+  const hoverRow = (allRow, logo) => {
+    const text = logo.textContent;
+
+    allRow.forEach(contact => {
+      contact.addEventListener('mouseenter', () => {
+        logo.textContent = contact.phoneLink.textContent;
+      });
+
+      contact.addEventListener('mouseleave', () => {
+        logo.textContent = text;
+      });
+    });
   };
 
   const init = (selectorApp, title) => {
     const app = document.querySelector(selectorApp);
     const phoneBook = renderPhoneBook(app, title);
 
-    const {list} = phoneBook;
+    const {list, logo, btnAdd, formOverlay, form, formCloseButton} = phoneBook;
 
-    renderContacts(list, data);
     // функционал
-  };
+    const allRow = renderContacts(list, data);
 
+    hoverRow(allRow, logo);
+
+    btnAdd.addEventListener('click', () => {
+      formOverlay.classList.add('is-visible');
+    });
+
+    form.addEventListener('click', event => {
+      event.stopImmediatePropagation();
+      // event.stopPropagation();
+    });
+
+    formOverlay.addEventListener('click', () => {
+      formOverlay.classList.remove('is-visible');
+    });
+
+    formCloseButton.addEventListener('click', () => {
+      formOverlay.classList.remove('is-visible');
+    });
+  };
 
   window.phoneBookInit = init;
 }
+
+
+// ///////////////////////////////////////////////////
+// btnAdd.addEventListener('click', {
+//   handleEvent() {
+//     formOverlay.classList.add('is-visible');
+//   },
+// });
+
+// const objEvent = {
+//   // // a: 1,
+//   // handleEvent() {
+//   //   // console.log(this.a);
+//   //   formOverlay.classList.add('is-visible');
+//   // },
+
+//   handleEvent(event) {
+//     if (event.ctrlKey) {
+//       this.bar();
+//     } else {
+//       this.foo();
+//     }
+//   },
+//   bar() {
+//     document.body.style.backgroundColor = 'violet';
+//   },
+//   foo() {
+//     formOverlay.classList.add('is-visible');
+//   },
+// };
+// btnAdd.addEventListener('click', objEvent);
+
+// //////////////////////////////////////////////////////
+// document.addEventListener('touchstart', e => {
+//   console.log(e);
+// });
+
+// document.addEventListener('touchmove', e => {
+//   console.log(e.type);
+// });
+
+// document.addEventListener('touchend', e => {
+//   console.log(e.type);
+// });
