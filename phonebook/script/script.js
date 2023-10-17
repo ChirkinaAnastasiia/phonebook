@@ -90,8 +90,8 @@ const data = [
     thead.insertAdjacentHTML('beforeend', `
       <tr>
         <th class="delete">Удалить</th>
-        <th>Имя</th>
-        <th>Фамилия</th>
+        <th><span class="name-filter">Имя</span></th>
+        <th><span class="surname-filter">Фамилия</span></th>
         <th>Телефон</th>
         <th></th>
       </tr>
@@ -272,6 +272,14 @@ const data = [
     });
   };
 
+  const sortedByField = (fieldName, list, logo) => {
+    data.sort((a, b) => (a[fieldName] > b[fieldName] ? 1 : -1));
+
+    list.innerHTML = '';
+    const allRow = renderContacts(list, data);
+    hoverRow(allRow, logo);
+  };
+
   const init = (selectorApp, title) => {
     const app = document.querySelector(selectorApp);
     const phoneBook = renderPhoneBook(app, title);
@@ -321,14 +329,25 @@ const data = [
       }
     });
 
-    setTimeout(() => {
-      const contact = createRow({
-        name: 'Name',
-        surname: 'Surname',
-        phone: '+71112223344',
-      });
-      list.append(contact);
-    }, 2000);
+    // setTimeout(() => {
+    //   const contact = createRow({
+    //     name: 'Name',
+    //     surname: 'Surname',
+    //     phone: '+71112223344',
+    //   });
+    //   list.append(contact);
+    // }, 2000);
+
+    const filterName = document.querySelector('.name-filter');
+    const filterSurname = document.querySelector('.surname-filter');
+
+    filterName.addEventListener('click', () => {
+      sortedByField('name', list, logo);
+    });
+
+    filterSurname.addEventListener('click', () => {
+      sortedByField('surname', list, logo);
+    });
   };
 
   window.phoneBookInit = init;

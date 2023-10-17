@@ -23,6 +23,14 @@ body {
   }
 }
 
+.name-filter:hover,
+.surname-filter:hover {
+  opacity: 0.5;
+  cursor: pointer;
+  transition: 0.3s ease-in-out;
+  border-bottom: 1px solid;
+}
+
 .delete {
   display: none;
 }
