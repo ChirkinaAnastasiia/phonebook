@@ -24,6 +24,11 @@ const data = [
 ];
 
 {
+  const addContactData = contact => {
+    data.push(contact);
+    console.log(data);
+  };
+
   const createContainer = () => {
     const container = document.createElement('div');
     container.classList.add('container');
@@ -102,7 +107,14 @@ const data = [
     table.append(thead, tbody);
     table.tbody = tbody;
 
-    return table;
+    const filterName = table.querySelector('.name-filter');
+    const filterSurname = table.querySelector('.surname-filter');
+
+    return {
+      table,
+      filterName,
+      filterSurname,
+    };
   };
 
   const createForm = () => {
@@ -148,12 +160,9 @@ const data = [
 
     overlay.append(form);
 
-    const formCloseButton = form.querySelector('.close');
-
     return {
       overlay,
       form,
-      formCloseButton,
     };
   };
 
@@ -193,25 +202,30 @@ const data = [
         text: 'Удалить',
       },
     ]);
-    const table = createTable();
-    const form = createForm();
+    const {
+      table,
+      filterName,
+      filterSurname,
+    } = createTable();
+    const {form, overlay} = createForm();
     const footer = createFooter();
     const footerText = createFooterText(title);
 
     header.headerContainer.append(logo);
-    main.mainContainer.append(buttonGroup.btnWrapper, table, form.overlay);
+    main.mainContainer.append(buttonGroup.btnWrapper, table, overlay);
     footer.footerContainer.append(footerText);
 
     app.append(header, main, footer);
 
     return {
       list: table.tbody,
+      filterName,
+      filterSurname,
       logo,
       btnAdd: buttonGroup.btns[0],
       btnDel: buttonGroup.btns[1],
-      formOverlay: form.overlay,
-      form: form.form,
-      formCloseButton: form.formCloseButton,
+      formOverlay: overlay,
+      form,
     };
   };
 
@@ -280,41 +294,42 @@ const data = [
     hoverRow(allRow, logo);
   };
 
-  const init = (selectorApp, title) => {
-    const app = document.querySelector(selectorApp);
-    const phoneBook = renderPhoneBook(app, title);
-
-    const {
-      list,
-      logo,
-      btnAdd,
-      btnDel,
-      formOverlay,
-      formCloseButton,
-    } = phoneBook;
-
-    // функционал
-    const allRow = renderContacts(list, data);
-
-    hoverRow(allRow, logo);
-
-    btnAdd.addEventListener('click', () => {
-      formOverlay.classList.add('is-visible');
+  const filterControl = (filterName, filterSurname, list, logo) => {
+    filterName.addEventListener('click', () => {
+      sortedByField('name', list, logo);
     });
+
+    filterSurname.addEventListener('click', () => {
+      sortedByField('surname', list, logo);
+    });
+  };
+
+  const modalControl = (btnAdd, formOverlay) => {
+    const openModal = () => {
+      formOverlay.classList.add('is-visible');
+    };
+
+    const closeModal = () => {
+      formOverlay.classList.remove('is-visible');
+    };
+
+    btnAdd.addEventListener('click', openModal);
 
     formOverlay.addEventListener('click', e => {
       const target = e.target;
 
       if (target === formOverlay ||
           target.closest('.close')) {
-        formOverlay.classList.remove('is-visible');
+        closeModal();
       }
     });
 
-    // formCloseButton.addEventListener('click', () => {
-    //   formOverlay.classList.remove('is-visible');
-    // });
+    return {
+      closeModal,
+    };
+  };
 
+  const deleteControl = (btnDel, list) => {
     btnDel.addEventListener('click', () => {
       document.querySelectorAll('.delete').forEach(del => {
         del.classList.toggle('is-visible');
@@ -328,71 +343,50 @@ const data = [
         target.closest('.contact').remove();
       }
     });
+  };
 
-    // setTimeout(() => {
-    //   const contact = createRow({
-    //     name: 'Name',
-    //     surname: 'Surname',
-    //     phone: '+71112223344',
-    //   });
-    //   list.append(contact);
-    // }, 2000);
+  const addContactPage = (contact, list) => {
+    list.append(createRow(contact));
+  };
 
-    const filterName = document.querySelector('.name-filter');
-    const filterSurname = document.querySelector('.surname-filter');
+  const formControl = (form, list, closeModal) => {
+    form.addEventListener('submit', e => {
+      e.preventDefault();
 
-    filterName.addEventListener('click', () => {
-      sortedByField('name', list, logo);
+      const formData = new FormData(e.target);
+      const newContact = Object.fromEntries(formData);
+
+      addContactPage(newContact, list);
+      addContactData(newContact);
+      form.reset();
+      closeModal();
     });
+  };
 
-    filterSurname.addEventListener('click', () => {
-      sortedByField('surname', list, logo);
-    });
+  const init = (selectorApp, title) => {
+    const app = document.querySelector(selectorApp);
+
+    const {
+      list,
+      filterName,
+      filterSurname,
+      logo,
+      btnAdd,
+      btnDel,
+      formOverlay,
+      form,
+    } = renderPhoneBook(app, title);
+
+    // функционал
+    const allRow = renderContacts(list, data);
+    const {closeModal} = modalControl(btnAdd, formOverlay);
+
+    hoverRow(allRow, logo);
+    deleteControl(btnDel, list);
+    formControl(form, list, closeModal);
+    filterControl(filterName, filterSurname, list, logo);
   };
 
   window.phoneBookInit = init;
 }
 
-
-// ///////////////////////////////////////////////////
-// btnAdd.addEventListener('click', {
-//   handleEvent() {
-//     formOverlay.classList.add('is-visible');
-//   },
-// });
-
-// const objEvent = {
-//   // // a: 1,
-//   // handleEvent() {
-//   //   // console.log(this.a);
-//   //   formOverlay.classList.add('is-visible');
-//   // },
-
-//   handleEvent(event) {
-//     if (event.ctrlKey) {
-//       this.bar();
-//     } else {
-//       this.foo();
-//     }
-//   },
-//   bar() {
-//     document.body.style.backgroundColor = 'violet';
-//   },
-//   foo() {
-//     formOverlay.classList.add('is-visible');
-//   },
-// };
-// btnAdd.addEventListener('click', objEvent);
-
-// //////////////////////////////////////////////////////
-// document.addEventListener('touchstart', e => {
-//   console.log(e);
-// });
-
-// document.addEventListener('touchmove', e => {
-//   console.log(e.type);
-// });
-
-// document.addEventListener('touchend', e => {
-//   console.log(e.type);
-// });
