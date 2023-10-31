@@ -1,32 +1,31 @@
 'use strict';
 
-const data = [
-  {
-    name: 'Иван',
-    surname: 'Петров',
-    phone: '+79514545454',
-  },
-  {
-    name: 'Игорь',
-    surname: 'Семёнов',
-    phone: '+79999999999',
-  },
-  {
-    name: 'Семён',
-    surname: 'Иванов',
-    phone: '+79800252525',
-  },
-  {
-    name: 'Мария',
-    surname: 'Попова',
-    phone: '+79876543210',
-  },
-];
 
 {
+  const getStorage = key => (JSON.parse(localStorage.getItem(key)) || []);
+
+  const setStorage = (key, obj) => {
+    const local = getStorage(key);
+
+    local.push(obj);
+
+    localStorage.setItem(key, JSON.stringify(local));
+  };
+
+  const removeStorage = phone => {
+    const local = getStorage('phonebook');
+
+    local.map((item, index) => {
+      if (item.phone === phone) {
+        local.splice(index, 1);
+      }
+    });
+
+    localStorage.setItem('phonebook', JSON.stringify(local));
+  };
+
   const addContactData = contact => {
-    data.push(contact);
-    console.log(data);
+    setStorage('phonebook', contact);
   };
 
   const createContainer = () => {
@@ -287,10 +286,14 @@ const data = [
   };
 
   const sortedByField = (fieldName, list, logo) => {
+    const data = getStorage('phonebook');
     data.sort((a, b) => (a[fieldName] > b[fieldName] ? 1 : -1));
 
+    localStorage.setItem('phonebook', JSON.stringify(data));
+
     list.innerHTML = '';
-    const allRow = renderContacts(list, data);
+    const allRow =
+      renderContacts(list, getStorage('phonebook'));
     hoverRow(allRow, logo);
   };
 
@@ -307,6 +310,9 @@ const data = [
   const modalControl = (btnAdd, formOverlay) => {
     const openModal = () => {
       formOverlay.classList.add('is-visible');
+      document.querySelectorAll('.delete').forEach(del => {
+        del.classList.remove('is-visible');
+      });
     };
 
     const closeModal = () => {
@@ -341,6 +347,10 @@ const data = [
 
       if (target.closest('.del-icon')) {
         target.closest('.contact').remove();
+
+        const phone =
+          target.closest('.contact').querySelector('[href]').innerHTML;
+        removeStorage(phone);
       }
     });
   };
@@ -378,7 +388,7 @@ const data = [
     } = renderPhoneBook(app, title);
 
     // функционал
-    const allRow = renderContacts(list, data);
+    const allRow = renderContacts(list, getStorage('phonebook'));
     const {closeModal} = modalControl(btnAdd, formOverlay);
 
     hoverRow(allRow, logo);
